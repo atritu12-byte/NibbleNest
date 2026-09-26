@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NibbleNest — Smart Food & Dish Suggestion Studio</title>
+  <meta name="description" content="Discover what to eat effortlessly. Get intelligent food recommendations based on your cravings, mood, dietary preferences, and kitchen ingredients.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dark-theme">
+  <!-- Ambient background glow elements -->
+  <div class="glow-orb glow-top-left" aria-hidden="true"></div>
+  <div class="glow-orb glow-top-right" aria-hidden="true"></div>
+  <div class="glow-orb glow-center" aria-hidden="true"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar" id="main-nav">
+    <div class="nav-container">
+      <a href="#" class="brand-logo" id="nav-brand-logo">
+        <div class="logo-icon-wrapper">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Nibble<span class="highlight">Nest</span></span>
+          <span class="brand-badge">TASTE AI</span>
+        </div>
+      </a>
+
+      <!-- Search in header (desktop) -->
+      <div class="header-search-box" id="header-search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="global-search-input" placeholder="Search dishes, ingredients, cuisines..." autocomplete="off">
+        <button type="button" id="clear-search-btn" class="clear-btn" aria-label="Clear search" style="display: none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <button type="button" class="nav-btn roulette-nav-btn" id="open-roulette-btn">
+          <i class="fa-solid fa-dice-d20"></i>
+          <span>Food Roulette</span>
+        </button>
+
+        <button type="button" class="nav-btn wizard-nav-btn" id="nav-suggest-btn">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Craving Wizard</span>
+        </button>
+
+        <button type="button" class="nav-btn favorites-nav-btn" id="open-favorites-btn" aria-label="Saved favorites">
+          <i class="fa-solid fa-heart"></i>
+          <span class="badge" id="favorites-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="hero-section">
+    <div class="hero-container">
+      <div class="hero-badge animate-fade-down">
+        <span class="pulse-dot"></span>
+        <span>Smart Appetite Intelligence • 100% Curation</span>
+      </div>
+
+      <h1 class="hero-title animate-fade-up">
+        Can't Decide What to Eat? <br>
+        <span class="gradient-text">Let Flavor Take the Wheel.</span>
+      </h1>
+
+      <p class="hero-subtitle animate-fade-up delay-1">
+        Whether you have 15 minutes, specific fridge ingredients, or an unyielding craving for spicy noodles, 
+        NibbleNest crafts the perfect dish suggestion instantly.
+      </p>
+
+      <!-- Hero Call-to-Actions -->
+      <div class="hero-actions animate-fade-up delay-2">
+        <button type="button" class="btn btn-primary btn-glow" id="hero-get-suggest-btn">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Smart Food Matcher</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary" id="hero-surprise-btn">
+          <i class="fa-solid fa-shuffle"></i>
+          <span>Surprise Me Today</span>
+        </button>
+
+        <button type="button" class="btn btn-glass" id="hero-roulette-btn">
+          <i class="fa-solid fa-dice-d20"></i>
+          <span>Spin Food Wheel</span>
+        </button>
+      </div>
+
+      <!-- Quick Mood Scroller / Mood chips -->
+      <div class="quick-mood-wrapper animate-fade-up delay-3">
+        <span class="mood-scroller-label">Filter by mood:</span>
+        <div class="quick-mood-chips" id="quick-mood-chips-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-content" id="main-content">
+    
+    <!-- Smart Craving Suggestion Section (Collapsible / Interactive Concierge) -->
+    <section class="suggester-section" id="suggester-section">
+      <div class="section-card glass-panel">
+        <div class="suggester-header">
+          <div class="suggester-title-group">
+            <div class="icon-avatar">
+              <i class="fa-solid fa-kitchen-set"></i>
+            </div>
+            <div>
+              <h2 class="section-heading">Smart Craving Concierge</h2>
+              <p class="section-subtext">Tell us what you feel like eating or what is in your kitchen</p>
+            </div>
+          </div>
+          <button type="button" class="toggle-wizard-btn" id="toggle-wizard-btn">
+            <span id="wizard-toggle-text">Minimize</span>
+            <i class="fa-solid fa-chevron-up" id="wizard-toggle-icon"></i>
+          </button>
+        </div>
+
+        <div class="suggester-body" id="suggester-body">
+          <form id="suggester-form" class="suggester-grid">
+            
+            <!-- Step 1: Mood Selection -->
+            <div class="suggester-card">
+              <label class="suggester-label">
+                <span class="label-number">1</span>
+                <span>Select Your Food Mood</span>
+              </label>
+              <div class="mood-selector-grid" id="wizard-mood-grid">
+                <!-- Dynamically injected moods -->
+              </div>
+            </div>
+
+            <!-- Step 2: Meal Type & Diet -->
+            <div class="suggester-card">
+              <label class="suggester-label">
+                <span class="label-number">2</span>
+                <span>Dietary Preference & Meal Type</span>
+              </label>
+
+              <div class="filter-subgroup">
+                <span class="subgroup-title">Meal Time</span>
+                <div class="radio-pill-group" id="meal-type-pill-group">
+                  <label class="pill-radio active">
+                    <input type="radio" name="mealType" value="all" checked>
+                    <span>Any Time</span>
+                  </label>
+                  <label class="pill-radio">
+                    <input type="radio" name="mealType" value="breakfast">
+                    <span>Breakfast ☕</span>
+                  </label>
+                  <label class="pill-radio">
+                    <input type="radio" name="mealType" value="lunch">
+                    <span>Lunch 🍱</span>
+                  </label>
+                  <label class="pill-radio">
+                    <input type="radio" name="mealType" value="dinner">
+                    <span>Dinner 🍷</span>
+                  </label>
+                  <label class="pill-radio">
+                    <input type="radio" name="mealType" value="snack">
+                    <span>Snacks 🍿</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="filter-subgroup mt-3">
+                <span class="subgroup-title">Dietary Focus</span>
+                <div class="select-wrapper">
+                  <select id="wizard-diet-select" class="custom-select">
+                    <option value="all">Any Diet (No restrictions)</option>
+                    <option value="vegetarian">Vegetarian 🥦</option>
+                    <option value="vegan">Vegan 🌱</option>
+                    <option value="high-protein">High Protein 💪</option>
+                    <option value="gluten-free">Gluten-Free 🌾</option>
+                    <option value="keto">Keto Friendly 🥩</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="filter-subgroup mt-3">
+                <div class="slider-header">
+                  <span class="subgroup-title">Max Prep Time:</span>
+                  <span class="slider-val" id="time-slider-val">45 mins</span>
+                </div>
+                <input type="range" id="prep-time-range" min="10" max="60" step="5" value="45" class="custom-range">
+                <div class="range-labels">
+                  <span>10m (Express)</span>
+                  <span>30m</span>
+                  <span>60m (Gourmet)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Kitchen Ingredients & Freeform Craving -->
+            <div class="suggester-card full-width">
+              <label class="suggester-label">
+                <span class="label-number">3</span>
+                <span>Fridge Ingredients & Cravings</span>
+              </label>
+
+              <div class="fridge-craving-row">
+                <!-- Freeform text -->
+                <div class="craving-input-group">
+                  <label for="craving-text-input" class="sub-label">Describe your craving:</label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <input type="text" id="craving-text-input" placeholder="e.g. 'hot noodle soup with garlic and crunch', 'something creamy and decadent'">
+                  </div>
+                </div>
+
+                <!-- Fridge Tag input -->
+                <div class="ingredients-input-group">
+                  <label for="fridge-input" class="sub-label">What's in your fridge? (Press Enter or Add):</label>
+                  <div class="ingredient-input-wrapper">
+                    <input type="text" id="fridge-input" placeholder="e.g. chicken, cheese, pasta, garlic...">
+                    <button type="button" id="add-fridge-tag-btn" class="btn btn-sm btn-glass">Add</button>
+                  </div>
+                  <div class="tags-container" id="fridge-tags-container">
+                    <!-- Added ingredient badges -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action button -->
+              <div class="suggester-submit-row">
+                <button type="submit" class="btn btn-primary btn-large btn-glow" id="submit-suggest-btn">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Find My Perfect Dishes</span>
+                </button>
+                <button type="button" class="btn btn-secondary btn-large" id="reset-wizard-btn">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span>Reset Wizard</span>
+                </button>
+              </div>
+            </div>
+
+          </form>
+
+          <!-- Suggestion Results Showcase (Visible when suggestions are returned) -->
+          <div class="suggestion-results-panel" id="suggestion-results-panel" style="display: none;">
+            <div class="results-header">
+              <div>
+                <span class="section-tag">AI CURATED FOR YOU</span>
+                <h3 class="results-title">Top Flavor Matches</h3>
+              </div>
+              <button type="button" class="btn btn-sm btn-glass" id="close-suggestions-btn">
+                <i class="fa-solid fa-xmark"></i>
+                <span>Close Suggestions</span>
+              </button>
+            </div>
+            
+            <div class="suggested-dishes-grid" id="suggested-dishes-grid">
+              <!-- Dynamically populated top matches with match % -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dishes Catalog Section -->
+    <section class="catalog-section" id="catalog-section">
+      <div class="catalog-header-bar">
+        <div>
+          <h2 class="section-heading">Explore Culinary Delights</h2>
+          <p class="section-subtext" id="dish-count-label">Browsing all crafted dishes</p>
+        </div>
+
+        <!-- Sort Control -->
+        <div class="sort-control">
+          <label for="sort-select"><i class="fa-solid fa-arrow-down-short-wide"></i> Sort By:</label>
+          <select id="sort-select" class="custom-select">
+            <option value="rating">Top Rated ⭐</option>
+            <option value="time-asc">Fastest Prep ⏱️</option>
+            <option value="calories-asc">Lowest Calories 🔥</option>
+            <option value="calories-desc">Heartiest / Rich 🔥</option>
+            <option value="name">Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs-container">
+        <div class="category-tabs-scroller" id="category-tabs-container">
+          <!-- Populated from metadata -->
+        </div>
+      </div>
+
+      <!-- Quick Filter Bar -->
+      <div class="filter-controls-bar glass-panel">
+        <div class="filters-row">
+          
+          <!-- Dietary dropdown -->
+          <div class="filter-item">
+            <label for="diet-filter-select"><i class="fa-solid fa-seedling"></i> Diet</label>
+            <select id="diet-filter-select" class="filter-select">
+              <option value="all">All Diets</option>
+              <option value="vegetarian">Vegetarian 🥦</option>
+              <option value="vegan">Vegan 🌱</option>
+              <option value="high-protein">High Protein 💪</option>
+              <option value="gluten-free">Gluten-Free 🌾</option>
+              <option value="keto">Keto Friendly 🥩</option>
+            </select>
+          </div>
+
+          <!-- Spice dropdown -->
+          <div class="filter-item">
+            <label for="spice-filter-select"><i class="fa-solid fa-pepper-hot"></i> Spice Level</label>
+            <select id="spice-filter-select" class="filter-select">
+              <option value="all">Any Spice Level</option>
+              <option value="0">Mild / No Spice (0🌶️)</option>
+              <option value="1">Gentle Kick (1🌶️)</option>
+              <option value="2">Medium Spicy (2🌶️)</option>
+              <option value="3">Fiery Hot (3🌶️)</option>
+            </select>
+          </div>
+
+          <!-- Max Time Chips -->
+          <div class="filter-item">
+            <label><i class="fa-solid fa-stopwatch"></i> Max Prep</label>
+            <div class="time-filter-chips" id="time-filter-chips">
+              <button type="button" class="chip active" data-time="all">All</button>
+              <button type="button" class="chip" data-time="20">&le; 20m</button>
+              <button type="button" class="chip" data-time="30">&le; 30m</button>
+              <button type="button" class="chip" data-time="45">&le; 45m</button>
+            </div>
+          </div>
+
+          <!-- Reset Filter Button -->
+          <button type="button" class="btn btn-sm btn-glass reset-all-btn" id="reset-all-filters-btn">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Reset Filters</span>
+          </button>
+        </div>
+
+        <!-- Active Filter Tags Display -->
+        <div class="active-filter-tags" id="active-filter-tags" style="display: none;">
+          <!-- dynamically rendered active tags -->
+        </div>
+      </div>
+
+      <!-- Dishes Grid -->
+      <div class="dishes-grid" id="dishes-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state glass-panel" id="empty-state" style="display: none;">
+        <div class="empty-icon"><i class="fa-solid fa-bowl-food"></i></div>
+        <h3>No dishes matched your filters</h3>
+        <p>Try loosening your spice level, prep time, or search terms to discover more delicious dishes.</p>
+        <button type="button" class="btn btn-primary" id="empty-reset-btn">Reset All Filters</button>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Dish Detail Modal -->
+  <div class="modal-overlay" id="dish-modal-overlay" aria-hidden="true">
+    <div class="modal-card glass-modal" id="dish-modal-card">
+      <button type="button" class="modal-close-btn" id="close-dish-modal-btn" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="modal-content" id="dish-modal-content">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Food Roulette / Spin Wheel Modal -->
+  <div class="modal-overlay" id="roulette-modal-overlay" aria-hidden="true">
+    <div class="modal-card glass-modal roulette-modal" id="roulette-modal-card">
+      <button type="button" class="modal-close-btn" id="close-roulette-modal-btn" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="roulette-header">
+        <div class="roulette-badge"><i class="fa-solid fa-dice"></i> LUNCH & DINNER ROULETTE</div>
+        <h2>Can't Decide? Spin the Taste Wheel!</h2>
+        <p>Give fate a chance to pick your next culinary journey.</p>
+      </div>
+
+      <div class="roulette-wheel-container">
+        <div class="wheel-pointer"><i class="fa-solid fa-location-arrow"></i></div>
+        <canvas id="roulette-canvas" width="420" height="420"></canvas>
+      </div>
+
+      <div class="roulette-controls">
+        <button type="button" class="btn btn-primary btn-large btn-glow" id="spin-wheel-btn">
+          <i class="fa-solid fa-play"></i>
+          <span>SPIN THE WHEEL!</span>
+        </button>
+      </div>
+
+      <!-- Result Banner -->
+      <div class="roulette-result-card" id="roulette-result-card" style="display: none;">
+        <div class="result-img-wrapper">
+          <img id="roulette-dish-img" src="" alt="Winner Dish">
+        </div>
+        <div class="result-info">
+          <span class="winner-tag">🎉 WINNER SELECTED!</span>
+          <h3 id="roulette-dish-name">Dish Name</h3>
+          <p id="roulette-dish-tagline">Tagline</p>
+          <div class="result-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="roulette-view-dish-btn">View Full Recipe</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="roulette-spin-again-btn">Spin Again</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Saved Favorites Drawer -->
+  <aside class="drawer" id="favorites-drawer" aria-hidden="true">
+    <div class="drawer-overlay" id="favorites-drawer-overlay"></div>
+    <div class="drawer-content glass-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <i class="fa-solid fa-heart text-red"></i>
+          <h3>Saved Craving Wishlist</h3>
+        </div>
+        <button type="button" class="drawer-close-btn" id="close-favorites-btn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body" id="favorites-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="drawer-footer">
+        <button type="button" class="btn btn-secondary btn-block" id="clear-all-favorites-btn">Clear All Favorites</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="logo-icon-wrapper">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <h3>NibbleNest</h3>
+        <p>Intelligent food suggestions curated for every appetite, mood, and kitchen.</p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Cuisines</h4>
+        <ul>
+          <li><a href="#" data-cuisine-filter="Italian">Italian Classics</a></li>
+          <li><a href="#" data-cuisine-filter="Japanese">Japanese Umami</a></li>
+          <li><a href="#" data-cuisine-filter="Mexican">Mexican Street Style</a></li>
+          <li><a href="#" data-cuisine-filter="Indian">Indian Curries</a></li>
+          <li><a href="#" data-cuisine-filter="Thai">Thai Flavors</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Moods</h4>
+        <ul>
+          <li><a href="#" data-mood-filter="comforting">Comfort Meals</a></li>
+          <li><a href="#" data-mood-filter="spicy">Spicy Cravings</a></li>
+          <li><a href="#" data-mood-filter="healthy-fresh">Healthy & Fresh</a></li>
+          <li><a href="#" data-mood-filter="sweet-craving">Sweet Tooth</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Dietary</h4>
+        <ul>
+          <li><a href="#" data-diet-filter="vegetarian">Vegetarian</a></li>
+          <li><a href="#" data-diet-filter="vegan">Vegan</a></li>
+          <li><a href="#" data-diet-filter="high-protein">High Protein</a></li>
+          <li><a href="#" data-diet-filter="gluten-free">Gluten Free</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 NibbleNest. Handcrafted with Node.js & Passion for Gastronomy.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
